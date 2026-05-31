@@ -25,5 +25,4 @@ jobs:
         MINECRAFT_HOST: ${{ secrets.MINECRAFT_HOST }}
         MINECRAFT_PORT: ${{ secrets.MINECRAFT_PORT }}
         MINECRAFT_USERNAME: ${{ secrets.MINECRAFT_USERNAME }}
-        MINECRAFT_PASSWORD: ${{ secrets.MINECRAFT_PASSWORD }}
       run: python bot.py
