@@ -3,8 +3,8 @@ import random
 import os
 
 # Ayarlar
-HOST = os.getenv("MINECRAFT_HOST", "play.aternos.me")
-PORT = int(os.getenv("MINECRAFT_PORT", 25565))
+HOST = os.getenv("MINECRAFT_HOST", "Y_Y_Y.aternos.me")
+PORT = int(os.getenv("MINECRAFT_PORT", 28322))
 USERNAME = os.getenv("MINECRAFT_USERNAME", "pisi_bot")
 
 print(f"🤖 Bot başlatılıyor...")
