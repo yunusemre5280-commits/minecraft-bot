@@ -1,78 +1,57 @@
-from mineflayer import Bot
+from minecraft.networking.connection import Connection
+from minecraft.networking.packets import Packet
+from minecraft.utility import attribute_alias
 import time
 import random
 import os
+from threading import Thread
 
-# Ortam değişkenlerinden oku
+# Ayarlar
 HOST = os.getenv("MINECRAFT_HOST", "play.aternos.me")
 PORT = int(os.getenv("MINECRAFT_PORT", 25565))
-USERNAME = os.getenv("MINECRAFT_USERNAME")
+USERNAME = os.getenv("MINECRAFT_USERNAME", "pisi_bot")
 PASSWORD = os.getenv("MINECRAFT_PASSWORD", "")
 
-if not USERNAME:
-    print("❌ MINECRAFT_USERNAME ortam değişkenini ayarlayın!")
-    exit(1)
-
-print(f"🤖 Bot başlatılıyor... {HOST}:{PORT}")
+print(f"🤖 Bot başlatılıyor...")
+print(f"📍 Sunucu: {HOST}:{PORT}")
 print(f"👤 Kullanıcı: {USERNAME}")
 
-options = {
-    "host": HOST,
-    "port": PORT,
-    "username": USERNAME,
-}
-
-# Eğer şifre varsa, ekle
-if PASSWORD:
-    options["password"] = PASSWORD
-
 try:
-    bot = Bot(options)
+    # Bağlantı oluştur
+    connection = Connection(HOST, PORT, username=USERNAME, password=PASSWORD if PASSWORD else None)
     
-    @bot.on_login
-    def on_login():
-        print("✅ Sunucuya bağlandı!")
+    print("🔗 Bağlanıyor...")
+    connection.connect()
     
-    @bot.on_spawn
-    def on_spawn():
-        print("🎮 Oyunda spawn oldu!")
+    print("✅ Sunucuya bağlandı!")
     
     def keep_alive():
         print("🔄 AFK modu başladı...")
         counter = 0
-        while True:
+        
+        while connection.networking_thread and connection.networking_thread.is_alive():
             try:
                 counter += 1
+                time.sleep(random.randint(20, 60))
                 
-                # İleri git
-                if random.choice([True, False]):
-                    bot.setControlState('forward', True)
-                    time.sleep(random.randint(3, 8))
-                    bot.setControlState('forward', False)
-                
-                # Sıçra
-                if random.choice([True, False]):
-                    bot.setControlState('jump', True)
-                    time.sleep(0.3)
-                    bot.setControlState('jump', False)
-                
-                # Sola git
-                if random.choice([True, False]):
-                    bot.setControlState('left', True)
-                    time.sleep(random.randint(2, 5))
-                    bot.setControlState('left', False)
-                
-                time.sleep(random.randint(15, 45))
-                
-                if counter % 10 == 0:
-                    print(f"✅ Bot aktif... ({counter} işlem)")
-                
+                if counter % 5 == 0:
+                    print(f"✅ Bot aktif... ({counter*30} saniye)")
+                    
             except Exception as e:
                 print(f"❌ Hata: {e}")
                 time.sleep(10)
     
-    bot.start()
-    keep_alive()
+    # AFK döngüsü başlat
+    keep_alive_thread = Thread(target=keep_alive, daemon=True)
+    keep_alive_thread.start()
+    
+    # Bağlantıyı açık tut
+    while connection.networking_thread.is_alive():
+        time.sleep(1)
+    
+    print("⛔ Bağlantı kapandı")
 
 except Exception as e:
     print(f"❌ Bağlantı hatası: {e}")
+    import traceback
+    traceback.print_exc()
